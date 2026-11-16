@@ -1,93 +1,119 @@
-Tutorials
-=========
+Getting started
+===============
 
-This section provides step-by-step tutorials for using CIGA to analyze social interaction data.
+After :doc:`installation`, run the examples below in order. They use an in-memory
+table, need no optional libraries, and do not contact a model provider.
 
-Getting Started
---------------
+1. Prepare pairwise interactions
+--------------------------------
 
-Installation
-~~~~~~~~~~~~
+Each row below is one line of dialogue. ``positions`` determines the analysis
+resolution; using only ``scene`` makes each observed scene one time step::
 
-Install CIGA using pip::
+    import pandas as pd
+    import ciga as cg
 
-    pip install ciga
+    dialogue = pd.DataFrame({
+        'scene': [1, 1, 2, 2],
+        'line': [1, 2, 1, 2],
+        'Speaker': ['Alice', 'Bob', 'Alice', 'Charlie'],
+        'Listener': ['Bob', 'Alice', 'Charlie', 'Alice'],
+        'text': ['Hello', 'Hi', 'Come in', 'Thanks'],
+    })
+    positions = ('scene',)
+    pairs = cg.prepare_data(dialogue, positions, source='Speaker', target='Listener', interaction='text')
+    pairs = cg.calculate_weights(pairs, weight_func=lambda text: 1)
+    tg = cg.TGraph(data=pairs, positions=positions, directed=True)
 
-Basic Workflow
-~~~~~~~~~~~~~
+The weight function assigns one to each pair interaction. If you already have
+numeric weights, pass their column name as ``weight=`` to ``prepare_data`` and skip
+``calculate_weights``. Use ``('scene', 'line')`` instead for line-level steps.
+Positions must be numeric and ordered coarsest first; display labels are separate.
 
-1. **Prepare your data**: Ensure your data contains source, target, and timestamp columns
-2. **Load and process**: Use CIGA's data preparation functions
-3. **Create TGraph**: Initialize a temporal graph object
-4. **Analyze**: Apply centrality measures, community detection, or property analysis
-5. **Visualize**: Generate interactive plots of your results
+2. Select a graph and analyze it
+--------------------------------
 
-Tutorial 1: Basic Analysis
---------------------------
+``get_graph`` returns an ``igraph.Graph`` for the selected point::
 
-This tutorial demonstrates how to load data, create a temporal graph, and perform basic analysis.
+    g = tg.get_graph((1,))
+    assert g.vcount() == 2
+    assert g.ecount() == 2  # Alice -> Bob and Bob -> Alice
 
-.. literalinclude:: ../ciga/examples/analysis.py
-    :language: python
+    degree = cg.graph_degree_centrality(g, weighted=True)
+    degree.insert(0, 'character', g.vs['name'])
+    print(degree)
 
-Tutorial 2: Centrality Analysis
-------------------------------
+Static centrality rows follow vertex order. Temporal centralities add names and
+time columns automatically::
 
-Learn how to compute and analyze centrality measures over time.
+    per_scene = cg.tgraph_degree_centrality(tg, accumulate=False, weighted=True)
+    assert list(per_scene.columns) == [
+        'scene', 'character', 'in_degree', 'out_degree', 'all_degree',
+        'weighted_in_degree', 'weighted_out_degree', 'weighted_all_degree',
+    ]
+    per_scene.to_csv('degrees.csv', index=False)
 
-.. literalinclude:: ../ciga/examples/centrality_analysis.py
-    :language: python
+For raw interaction tables, temporal graph analyses default to cumulative history;
+memory-state tables default to snapshots. Choose explicitly when comparing results::
 
-Tutorial 3: Community Detection
-------------------------------
+    cumulative = cg.tgraph_degree_centrality(tg)  # all history through each step
+    snapshots = cg.tgraph_degree_centrality(tg, accumulate=False)
+    windowed = cg.tgraph_degree_centrality(tg, window_size=2)
 
-Discover communities in your social network data.
+A window counts observed steps, not seconds or line-number distance. Here a
+two-step window includes the current and previous observed scenes.
 
-.. literalinclude:: ../ciga/examples/community_detection.py
-    :language: python
+3. Save or explore a view
+-------------------------
 
-Tutorial 4: Interactive Visualization
-------------------------------------
+Save a static HTML view without opening a browser::
 
-Create interactive plots for exploring your graph data.
+    path = cg.graph_viz(g, output_file='scene-1.html', open_browser=False)
 
-.. literalinclude:: ../ciga/examples/plot_graph.py
-    :language: python
+Open the file to explore it. The graph viewer loads its web libraries from a CDN,
+so it needs internet access. To explore the full timeline interactively, run::
 
-Tutorial 5: Listener Inference
------------------------------
+    cg.tgraph_viz(tg)
 
-Infer listeners from conversation data.
+This opens a browser and keeps the terminal running until Ctrl+C. In a notebook,
+use ``blocking=False`` and retain the returned server so you can close it later.
+See :doc:`visualization` for cleanup, time labels and animation export.
 
-.. literalinclude:: ../ciga/examples/infer_listeners.py
-    :language: python
+4. Preserve group events with a hypergraph
+------------------------------------------
 
-Advanced Topics
---------------
+When Alice addresses Bob and Charlie together, pair expansion produces two rows.
+Hypergraph preparation keeps that utterance as one event::
 
-Temporal Graph Analysis
-~~~~~~~~~~~~~~~~~~~~~~
+    group_dialogue = pd.DataFrame({
+        'scene': [1, 1, 2],
+        'source': ['Alice', 'Alice', 'Bob'],
+        'target': ['Bob, Charlie', 'Bob, Charlie', 'Charlie'],
+    })
+    events = cg.prepare_hypergraph_data(group_dialogue, positions=['scene'])
+    th = cg.THypergraph(data=events, positions=['scene'])
+    h = th.get_hypergraph((1,))
+    assert h.ecount() == 2  # two utterances, even though the groups are identical
+    assert h.vcount() == 3
 
-CIGA supports sophisticated temporal analysis including:
+    degree = cg.hypergraph_degree_centrality(h, include_character=True)
+    print(degree)  # event participation, not pair degree
+    cg.thypergraph_viz(th, output_file='groups-over-time.html', open_browser=False)
 
-- Accumulative vs. snapshot analysis
-- Weight normalization and inversion
-- Fade functions for time-decay effects
-- Multi-level temporal segmentation
+``THypergraph`` is directed by default, like ``TGraph``. Set ``directed=False`` on
+both hypergraph preparation and construction to analyze undirected participation.
+Hypergraph HTML exports are self-contained. See :doc:`hypergraph` for metric
+definitions and :doc:`hypergraph_backends` for native research methods.
 
-Performance Optimization
-~~~~~~~~~~~~~~~~~~~~~~~
+Next steps
+----------
 
-For large datasets:
+- :doc:`data`: load your CSV and choose the weight definition.
+- :doc:`graph`: select hierarchical time points and windows.
+- :doc:`analysis`: choose metrics, community models and time-respecting paths.
+- :doc:`visualization`: customize viewers and export GIF/MP4.
 
-- Use appropriate time segmentation
-- Enable graph caching for repeated analysis
-- Consider memory usage when setting accumulation parameters
-
-Best Practices
---------------
-
-1. **Data Quality**: Ensure your timestamp data is properly formatted
-2. **Memory Management**: For large datasets, consider processing in chunks
-3. **Validation**: Always validate your results with known patterns in your data
-4. **Documentation**: Keep track of your analysis parameters for reproducibility 
+The repository's ``ciga/examples/`` scripts use the tracked dialogue CSVs and should
+be run from the checkout root after installation. Listener inference additionally
+needs a configured model client. For a graph/hypergraph comparison using both CSVs,
+run ``python examples/hypergraph_dialogue.py``; see :doc:`hypergraph` for its outputs.

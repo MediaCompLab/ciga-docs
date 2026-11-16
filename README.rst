@@ -1,32 +1,22 @@
-CIGA Documentation
-==================
+CIGA documentation preview
+==========================
 
-CIGA is a Python package designed for performing graph analysis on social interactions between individuals across time. It is a redesign of CharNet using igraph.
+This repository builds the Read the Docs site. The documentation on this branch
+describes the CIGA 0.1.6 development candidate, which has not yet been released.
+Do not merge it into the published documentation branch until the corresponding
+package release is ready.
 
-Installation
-------------
+The canonical guide is maintained in the ``docs/`` directory of the
+`CIGA source repository <https://github.com/MediaCompLab/ciga>`_. This snapshot
+comes from commit ``5286afa07a5b685f734d540a3422fe7334bf51a9``. The package
+dependency in ``docs/requirements.txt`` is pinned to that same commit, so Sphinx
+autodoc cannot silently document an older PyPI release. When syncing later,
+update the guide and package pin together, verify the build, and remove the
+development notices when 0.1.6 is actually released.
 
-Install CIGA using pip:
+To build locally with Git and Python 3.11 or later::
 
-.. code-block:: bash
+    python -m pip install -r docs/requirements.txt
+    python -m sphinx -b html -W --keep-going docs/source build/html
 
-    pip install ciga
-
-Documentation
--------------
-
-Full documentation is available at: https://ciga-docs.readthedocs.io/
-
-Features
---------
-
-- Graph analysis tools for social network data
-- Temporal graph analysis capabilities  
-- Centrality and community analysis
-- Visualization tools
-- Built on top of igraph for performance
-
-License
--------
-
-CIGA is distributed under the GNU General Public License v3.0 (GPL-3.0).
+The published documentation is at https://ciga-docs.readthedocs.io/.
