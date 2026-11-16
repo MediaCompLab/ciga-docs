@@ -1,8 +1,7 @@
 Migrating from CIGA 0.1.5 to 0.1.6
 ===================================
 
-This guide compares the development candidate for 0.1.6 with the published PyPI
-0.1.5 package. Version 0.1.6 is not yet published. Check the exact package and
+This guide compares the published PyPI 0.1.6 and 0.1.5 packages. Check the exact package and
 dependency versions in each research environment; the old development checkout
 also advertised 0.1.5 despite containing code not present in the PyPI wheel.
 

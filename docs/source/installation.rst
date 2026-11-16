@@ -8,12 +8,11 @@ require Python 3.10 or later; Reticula requires Python 3.12 or later.
 Published package
 -----------------
 
-After CIGA 0.1.6 is published, install this version from PyPI::
+Install CIGA 0.1.6 from PyPI::
 
     python -m pip install "ciga==0.1.6"
 
-Graph and hypergraph APIs are included in the same release. Before publication,
-use the source checkout below.
+Graph and hypergraph APIs are included in the same release.
 
 Current source
 --------------
@@ -25,7 +24,8 @@ From a terminal, clone and install CIGA in your active Python environment::
     git checkout 5286afa07a5b685f734d540a3422fe7334bf51a9
     python -m pip install -e .
 
-If you already have the checkout, run only the install command from its root.
+This checks out the source revision matching the 0.1.6 package. If you already
+have the checkout, check out that revision before installing from its root.
 Verify which copy Python loads::
 
     python -c "import ciga; print(ciga.__version__); print(ciga.__file__)"

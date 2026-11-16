@@ -1,11 +1,6 @@
 CIGA documentation
 ==================
 
-.. warning::
-
-   This is a preview of the CIGA 0.1.6 development candidate. Version 0.1.6
-   has not yet been published; these pages do not describe the current PyPI release.
-
 CIGA analyzes character interactions over time using graphs and hypergraphs.
 Graphs summarize pairwise relationships; hypergraphs preserve each group interaction
 as an event, including repeated events and speaker/listener roles.

@@ -1,5 +1,4 @@
 sphinx>=7,<10
 sphinx-rtd-theme
-# Pin the exact candidate documented here. Update the source revision with each sync;
-# after 0.1.6 is released, the pin may instead reference that released artifact.
-ciga @ git+https://github.com/MediaCompLab/ciga.git@5286afa07a5b685f734d540a3422fe7334bf51a9
+# Keep autodoc aligned with the version described by this guide.
+ciga==0.1.6

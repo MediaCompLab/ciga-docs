@@ -1,22 +1,17 @@
-CIGA documentation preview
-==========================
+CIGA documentation
+==================
 
-This repository builds the Read the Docs site. The documentation on this branch
-describes the CIGA 0.1.6 development candidate, which has not yet been released.
-Do not merge it into the published documentation branch until the corresponding
-package release is ready.
+This repository builds the `CIGA documentation <https://ciga-docs.readthedocs.io/>`_.
+The current guide describes CIGA 0.1.6, available on PyPI.
 
 The canonical guide is maintained in the ``docs/`` directory of the
-`CIGA source repository <https://github.com/MediaCompLab/ciga>`_. This snapshot
-comes from commit ``5286afa07a5b685f734d540a3422fe7334bf51a9``. The package
-dependency in ``docs/requirements.txt`` is pinned to that same commit, so Sphinx
-autodoc cannot silently document an older PyPI release. When syncing later,
-update the guide and package pin together, verify the build, and remove the
-development notices when 0.1.6 is actually released.
+`CIGA source branch <https://github.com/MediaCompLab/ciga/tree/codex/p5-temporal-access-20261102/docs>`_. This guide
+corresponds to release source revision ``5286afa07a5b685f734d540a3422fe7334bf51a9``
+and includes release-status updates. ``docs/requirements.txt`` pins the same
+published version for Sphinx autodoc. When syncing a later release, update the
+guide and package pin together and verify the build.
 
-To build locally with Git and Python 3.11 or later::
+To build locally with Python 3.11 or later::
 
     python -m pip install -r docs/requirements.txt
     python -m sphinx -b html -W --keep-going docs/source build/html
-
-The published documentation is at https://ciga-docs.readthedocs.io/.
